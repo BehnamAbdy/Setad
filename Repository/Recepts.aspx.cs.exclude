@@ -1,0 +1,317 @@
+﻿using System;
+using System.Linq;
+using System.Data.SqlClient;
+
+public partial class Repository_Recepts : System.Web.UI.Page
+{
+    private SupplySystem.SupplySystem db = new SupplySystem.SupplySystem(Public.ConnectionString);
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            int gCode = 0;
+            short repId = 0;
+            if (int.TryParse(Request.QueryString["gCode"], out gCode) && short.TryParse(Request.QueryString["repId"], out repId))
+            {
+                var good = from gd in db.REP_Goods
+                           join repGd in db.REP_Repository_Goods on gd.GoodID equals repGd.GoodID
+                           where gd.GoodCode == Public.ToInt(gCode) && repGd.RepositoryID == Public.ToShort(repId)
+                           select
+                     new
+                     {
+                         gd.GoodID,
+                         gd.GoodName,
+                         Unit1 = gd.REP_Unit.UnitName,
+                         Unit2 = gd.SecondaryUnit.UnitName,
+                         Unit3 = gd.ThirdUnit.UnitName,
+                         gd.FirstConversionCoefficient,
+                         gd.SecondConversionCoefficient
+                     };
+                System.Web.Script.Serialization.JavaScriptSerializer serializer = new System.Web.Script.Serialization.JavaScriptSerializer();
+                Response.Clear();
+                Response.Write(serializer.Serialize(good));
+                Response.End();
+            }
+            else if (int.TryParse(Request.QueryString["rdId"], out gCode)) // Delete ReceptDetail
+            {
+                db.REP_ReceptDetails.DeleteOnSubmit(db.REP_ReceptDetails.SingleOrDefault<SupplySystem.REP_ReceptDetail>(rt => rt.ReceptDetailID == gCode));
+                db.SubmitChanges();
+                Response.Clear();
+                Response.Write("1");
+                Response.End();
+            }
+            else if (Request.QueryString["type"] == null ||
+                 !(Request.QueryString["type"].Equals("1") ||
+                   Request.QueryString["type"].Equals("2") ||
+                   Request.QueryString["type"].Equals("3") ||
+                   Request.QueryString["type"].Equals("4")))
+            {
+                Server.Transfer("~/Error.aspx");
+            }
+            else
+            {
+                switch (Request.QueryString["type"])
+                {
+                    case "1":
+                        this.lblHeader.InnerText = "صدور حواله انبار";
+                        break;
+
+                    case "2":
+                        this.lblHeader.InnerText = "صدور رسید انبار";
+                        this.txtAreaCode.Enabled = false;
+                        this.btnAreaSearch.Enabled = false;
+                        break;
+
+                    case "3":
+                        this.lblHeader.InnerText = "برگشت از حواله";
+                        break;
+
+                    case "4":
+                        this.lblHeader.InnerText = "برگشت از رسید";
+                        this.txtAreaCode.Enabled = false;
+                        this.btnAreaSearch.Enabled = false;
+                        break;
+                }
+            }
+
+            this.hdnType.Value = Request.QueryString["type"];
+            this.drpRepositories.DataSource = db.REP_Repositories;
+            this.drpRepositories.DataBind();
+            this.drpRepositories.Items.Insert(0, new System.Web.UI.WebControls.ListItem("--- انتخاب ---", "0"));
+
+            if (System.Web.HttpContext.Current.User.IsInRole("Guest"))
+            {
+                this.btnSaveHeader.Enabled = false;
+                this.btnSaveDetail.Enabled = false;
+            }
+        }
+    }
+
+    protected void txtReceptCode_TextChanged(object sender, EventArgs e)
+    {
+        if (!string.IsNullOrEmpty(this.txtReceptCode.Text))
+        {
+            SetHeaderControls(db.REP_Recepts.FirstOrDefault<SupplySystem.REP_Recept>(rcp => rcp.ReceptCode == this.txtReceptCode.Text.Trim()), false);
+            FillGrid(Public.ToInt(this.hdnReceptId.Value));
+            this.pnlDetail.Enabled = true;
+        }
+        else
+        {
+            SetHeaderControls(null, true);
+            SetDetailControls(null);
+            this.pnlDetail.Enabled = false;
+        }
+
+        this.txtDate.Focus();
+    }
+
+    protected void btnSaveHeader_Click(object sender, EventArgs e)
+    {
+        if (Page.IsValid)
+        {
+            if (string.IsNullOrEmpty(this.hdnReceptId.Value))
+            {
+                SupplySystem.REP_Recept recept = new SupplySystem.REP_Recept
+                {
+                    ReceptCode = this.txtReceptCode.Text.Trim(),
+                    AreaCode = Public.ToShort(this.txtAreaCode.Text),
+                    RepositoryID = Public.ToShort(this.drpRepositories.SelectedValue),
+                    ReceptDate = this.txtDate.GeorgianDate.Date,
+                    ReceptType = Public.ToByte(this.hdnType.Value),
+                    Comment = this.txtComment.Text
+                };
+
+                db.REP_Recepts.InsertOnSubmit(recept);
+            }
+            else
+            {
+                SupplySystem.REP_Recept recept = db.REP_Recepts.FirstOrDefault<SupplySystem.REP_Recept>(rcp => rcp.ReceptID == Public.ToInt(this.hdnReceptId.Value));
+                recept.RepositoryID = Public.ToShort(this.drpRepositories.SelectedValue);
+                recept.ReceptDate = this.txtDate.GeorgianDate;
+                recept.Comment = this.txtComment.Text;
+            }
+
+            db.SubmitChanges();
+            this.lblMessage.Text = Public.SUCCESSMESSAGE;
+            this.pnlDetail.Enabled = true;
+        }
+    }
+
+    protected void btnSaveDetail_Click(object sender, EventArgs e)
+    {
+        if (Page.IsValid)
+        {
+            if (!string.IsNullOrEmpty(this.hdnReceptId.Value) && !string.IsNullOrEmpty(this.hdnConversionCoefficient.Value))
+            {
+                string[] coefficients = this.hdnConversionCoefficient.Value.Split('|');
+                int firstCoefficient = Public.ToInt(coefficients[0]);
+                int secondCoefficient = Public.ToInt(coefficients[1]);
+                int firstBalance = Public.ToInt(this.txtFirstBalance.Text);
+                int secondBalance = Public.ToInt(this.txtSecondBalance.Text);
+                int thirdBalance = Public.ToInt(this.txtThirdBalance.Text);
+                int requestedCount = requestedCount = GetTotalOrderCount(firstBalance, secondBalance, thirdBalance, firstCoefficient, secondCoefficient);
+
+                if (this.hdnType.Value.Equals("1") || this.hdnType.Value.Equals("4"))
+                {
+                    SupplySystem.REP_Repository_Good repGood = db.REP_Repository_Goods.FirstOrDefault<SupplySystem.REP_Repository_Good>(rg => rg.RepositoryID == Public.ToInt(this.drpRepositories.SelectedValue) && rg.GoodID == Public.ToInt(this.hdnGoodId.Value));
+                    int repositoryCount = GetTotalOrderCount(Public.ToInt(repGood.RemainingByFirstUnitID), Public.ToInt(repGood.RemainingBySecondUnitID), Public.ToInt(repGood.RemainingByThirdUnitID), firstCoefficient, secondCoefficient);
+
+                    if (requestedCount > repositoryCount)
+                    {
+                        this.lblMessage.Text = string.Format("درخواست شما بیشتر از موجودی انبار میباشد ! موجودی انبار = {0} و درخواست شما = {1} است", repositoryCount, requestedCount);
+                        return;
+                    }
+                }
+
+                int remainder = 0;
+                int div = Math.DivRem(requestedCount, secondCoefficient, out remainder);
+
+                SupplySystem.REP_ReceptDetail rcpDetail = new SupplySystem.REP_ReceptDetail
+                {
+                    ReceptID = Public.ToInt(this.hdnReceptId.Value),
+                    GoodID = Public.ToInt(this.hdnGoodId.Value),
+                    FirstBalance = div / firstCoefficient,
+                    SecondBalance = (short)(div % firstCoefficient),
+                    ThirdBalance = (short)(requestedCount % secondCoefficient),
+                    BasePrice = Public.ToDecimal(this.txtPrice.Text)
+                };
+
+                db.REP_ReceptDetails.InsertOnSubmit(rcpDetail);
+            }
+
+            try
+            {
+                db.SubmitChanges();
+            }
+            catch (SqlException ex)
+            {
+                if (ex.Message.Contains("UNIQUE KEY"))
+                {
+                    this.lblMessage.Text = "کالا تکراری میباشد!";
+                }
+            }
+
+            FillGrid(Public.ToInt(this.hdnReceptId.Value));
+            SetDetailControls(null);
+        }
+    }
+
+    private int GetTotalOrderCount(int firstUnitCount, int secondUnitCount, int thirdUnitCount, int firstCoefficient, int secondCoefficient)
+    {
+        int totalCount = 0;
+
+        if (firstUnitCount > 0)
+        {
+            totalCount = firstUnitCount * firstCoefficient;
+        }
+
+        if (secondUnitCount > 0)
+        {
+            if (totalCount > 0)
+            {
+                return (totalCount * secondUnitCount) * secondCoefficient + thirdUnitCount;
+            }
+            else
+            {
+                return secondUnitCount * secondCoefficient + thirdUnitCount;
+            }
+        }
+
+        return thirdUnitCount;
+    }
+
+    private string GetTotal(int firstUnitCount, int secondUnitCount, int thirdUnitCount, int firstCoefficient, int secondCoefficient)
+    {
+        return GetTotalOrderCount(firstUnitCount, secondUnitCount, thirdUnitCount, firstCoefficient, secondCoefficient).ToString();
+    }
+
+    private bool CheckRepositoryContent()
+    {
+        SupplySystem.REP_Repository_Good repGood = db.REP_Repository_Goods.SingleOrDefault<SupplySystem.REP_Repository_Good>(rg => rg.RepositoryID == Public.ToInt(this.drpRepositories.SelectedValue) && rg.GoodID == Public.ToInt(this.hdnGoodId.Value));
+        string[] coefficients = this.hdnConversionCoefficient.Value.Split('|');
+        int firstCoefficient = Public.ToInt(coefficients[0]);
+        int secondCoefficient = Public.ToInt(coefficients[1]);
+        int repositoryCount = GetTotalOrderCount(Public.ToInt(repGood.RemainingByFirstUnitID), Public.ToInt(repGood.RemainingBySecondUnitID), Public.ToInt(repGood.RemainingByThirdUnitID), firstCoefficient, secondCoefficient);
+        int requestedCount = GetTotalOrderCount(Public.ToInt(this.txtFirstBalance.Text), Public.ToInt(this.txtSecondBalance.Text), Public.ToInt(this.txtThirdBalance.Text), firstCoefficient, secondCoefficient);
+
+        if (requestedCount > repositoryCount)
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private void FillGrid(int receptId)
+    {
+        var receptDetails = from rep_receptdetail in db.REP_ReceptDetails
+                            join rep_good in db.REP_Goods on rep_receptdetail.GoodID equals rep_good.GoodID
+                            where rep_receptdetail.ReceptID == receptId
+                            select new
+                            {
+                                ReceptDetailID = rep_receptdetail.ReceptDetailID,
+                                FirstBalance = rep_receptdetail.FirstBalance,
+                                SecondBalance = rep_receptdetail.SecondBalance,
+                                ThirdBalance = rep_receptdetail.ThirdBalance,
+                                BasePrice = rep_receptdetail.BasePrice,
+                                GoodID = rep_good.GoodID,
+                                GoodName = rep_good.GoodName,
+                                Total = GetTotal(rep_receptdetail.FirstBalance, (int)rep_receptdetail.SecondBalance, (int)rep_receptdetail.ThirdBalance, (int)rep_good.FirstConversionCoefficient, (int)rep_good.SecondConversionCoefficient)
+                            };
+
+        this.grdReceptDetails.DataSource = receptDetails.ToList();
+        this.grdReceptDetails.DataBind();
+    }
+
+    private void SetHeaderControls(SupplySystem.REP_Recept recept, bool clearCode)
+    {
+        if (recept != null)
+        {
+            this.hdnReceptId.Value = recept.ReceptID.ToString();
+            this.txtAreaCode.Text = recept.AreaCode.ToString();
+            this.txtAreaName.Text = recept.Area.AreaName;
+            this.txtDate.Text = Public.ToPersianDate(recept.ReceptDate);
+            this.drpRepositories.SelectedValue = recept.RepositoryID.ToString();
+            this.txtComment.Text = recept.Comment;
+        }
+        else
+        {
+            if (clearCode)
+            {
+                this.txtReceptCode.Text = null;
+            }
+            this.hdnReceptId.Value = null;
+            this.txtAreaCode.Text = null;
+            this.txtAreaName.Text = null;
+            this.txtDate.Text = null;
+            this.drpRepositories.SelectedIndex = 0;
+            this.txtComment.Text = null;
+        }
+    }
+
+    private void SetDetailControls(SupplySystem.REP_ReceptDetail receptDetail)
+    {
+        if (receptDetail != null)
+        {
+            this.hdnGoodId.Value = receptDetail.GoodID.ToString();
+            var good = db.REP_Goods.Where(g => g.GoodID == receptDetail.GoodID).Select(g => new { GoodCode = g.GoodCode, GoodName = g.GoodName });
+            this.txtGoodCode.Text = good.ToList()[0].GoodCode.ToString();
+            this.txtGoodName.Text = good.ToList()[0].GoodName;
+            this.txtFirstBalance.Text = receptDetail.FirstBalance.ToString();
+            this.txtSecondBalance.Text = receptDetail.SecondBalance.ToString();
+            this.txtThirdBalance.Text = receptDetail.ThirdBalance.ToString();
+            this.txtPrice.Text = receptDetail.BasePrice.ToString();
+        }
+        else
+        {
+            this.hdnGoodId.Value = null;
+            this.txtGoodCode.Text = null;
+            this.txtGoodName.Text = null;
+            this.txtFirstBalance.Text = null;
+            this.txtSecondBalance.Text = null;
+            this.txtThirdBalance.Text = null;
+            this.txtPrice.Text = null;
+        }
+    }
+}

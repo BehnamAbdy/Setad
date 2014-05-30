@@ -1,0 +1,147 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public partial class Repository_Repository : System.Web.UI.Page
+{
+    private SupplySystem.SupplySystem db = new SupplySystem.SupplySystem(Public.ConnectionString);
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            this.drpRepositoryTypes.DataSource = db.REP_RepositoryTypes;
+            this.drpRepositoryTypes.DataBind();
+            FillGrid(Public.ToShort(this.drpRepositoryTypes.SelectedValue));
+
+            if (System.Web.HttpContext.Current.User.IsInRole("Guest"))
+            {
+                this.btnSave.Enabled = false;
+            }
+        }
+    }
+
+    protected void txtRepositoryCode_TextChanged(object sender, EventArgs e)
+    {
+        if (string.IsNullOrEmpty(this.txtRepositoryCode.Text))
+        {
+            SetControls(null, false);
+        }
+        else
+        {
+            SetControls(db.REP_Repositories.SingleOrDefault<SupplySystem.REP_Repository>(rep => rep.RepositoryCode == Public.ToShort(this.txtRepositoryCode.Text)), false);
+        }
+
+        this.txtRepositoryName.Focus();
+    }
+
+    protected void btnSave_Click(object sender, EventArgs e)
+    {
+        if (Page.IsValid)
+        {
+            short repositoryTypeId = Public.ToShort(this.drpRepositoryTypes.SelectedValue);
+
+            if (string.IsNullOrEmpty(this.hdnRepositoryId.Value))
+            {
+                SupplySystem.REP_Repository repObj = new SupplySystem.REP_Repository
+                {
+                    RepositoryCode = Public.ToShort(this.txtRepositoryCode.Text)
+                                    ,
+                    RepositoryName = this.txtRepositoryName.Text
+                                    ,
+                    RepositoryTypeID = repositoryTypeId
+                                    ,
+                    Phone1 = this.txtPhone1.Text
+                                    ,
+                    Phone2 = this.txtPhone2.Text
+                                    ,
+                    Address = this.txtAddress.Text
+                };
+
+                db.REP_Repositories.InsertOnSubmit(repObj);
+            }
+            else
+            {
+                SupplySystem.REP_Repository repObj = db.REP_Repositories.SingleOrDefault<SupplySystem.REP_Repository>(rep => rep.RepositoryCode == Public.ToShort(this.txtRepositoryCode.Text));
+                if (repObj != null)
+                {
+                    repObj.RepositoryName = this.txtRepositoryName.Text;
+                    repObj.RepositoryTypeID = repositoryTypeId;
+                    repObj.Phone1 = this.txtPhone1.Text;
+                    repObj.Phone2 = this.txtPhone2.Text;
+                    repObj.Address = this.txtAddress.Text;
+                }
+            }
+
+            db.SubmitChanges();
+            FillGrid(repositoryTypeId);
+            this.lblMessage.Text = Public.SUCCESSMESSAGE;
+            SetControls(null, true);
+        }
+    }
+
+    protected void btnEdit_Click(object sender, EventArgs e)
+    {
+        if (this.grdRepository.SelectedItems.Count == 1)
+        {
+            SetControls(db.REP_Repositories.First<SupplySystem.REP_Repository>(rep => rep.RepositoryID == Public.ToShort(this.grdRepository.SelectedKeys[0])), true);
+        }
+        else
+        {
+            SetControls(null, true);
+        }
+    }
+
+    protected void drpRepositoryTypes_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        FillGrid(Public.ToShort(this.drpRepositoryTypes.SelectedValue));
+        SetControls(null, true);
+    }
+
+    private void FillGrid(short repositoryTypeId)
+    {
+        var reporitories = from rp in db.REP_Repositories
+                           join rpt in db.REP_RepositoryTypes on rp.RepositoryTypeID equals rpt.RepositoryTypeID
+                           where rp.RepositoryTypeID == repositoryTypeId
+                           orderby rp.RepositoryCode
+                           select new
+                           {
+                               rp.RepositoryID,
+                               rp.RepositoryCode,
+                               rp.RepositoryName,
+                               rpt.TypeName,
+                           };
+        this.grdRepository.DataSource = reporitories.ToList();
+        this.grdRepository.DataBind();
+    }
+
+    private void SetControls(SupplySystem.REP_Repository repObj, bool clearCode)
+    {
+        if (repObj != null)
+        {
+            this.hdnRepositoryId.Value = repObj.RepositoryID.ToString();
+            this.txtRepositoryCode.Text = repObj.RepositoryCode.ToString();
+            this.txtRepositoryName.Text = repObj.RepositoryName;
+            this.drpRepositoryTypes.SelectedValue = repObj.RepositoryTypeID.ToString();
+            this.txtPhone1.Text = repObj.Phone1;
+            this.txtPhone2.Text = repObj.Phone2;
+            this.txtAddress.Text = repObj.Address;
+        }
+        else
+        {
+            if (clearCode)
+            {
+                this.txtRepositoryCode.Text = null;
+            }
+            this.hdnRepositoryId.Value = null;
+            this.txtRepositoryName.Text = null;
+            //this.drpRepositoryTypes.SelectedIndex = 0;
+            this.txtPhone1.Text = null;
+            this.txtPhone2.Text = null;
+            this.txtAddress.Text = null;
+        }
+    }
+}

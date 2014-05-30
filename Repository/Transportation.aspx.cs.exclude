@@ -1,0 +1,187 @@
+﻿using System;
+using System.Linq;
+using System.Web.UI;
+
+public partial class Repository_Transportation : System.Web.UI.Page
+{
+    private SupplySystem.SupplySystem db = new SupplySystem.SupplySystem(Public.ConnectionString);
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            int receptDetailId = 0;
+            int total = 0;
+            if (int.TryParse(Request.QueryString["rdId"], out receptDetailId) &&
+                int.TryParse(Request.QueryString["tot"], out total))
+            {
+                this.hdnReceptDetailId.Value = receptDetailId.ToString();
+                this.hdnTotal.Value = total.ToString();
+                FillGrid(receptDetailId);
+            }
+            else
+            {
+                Server.Transfer("/Error.aspx");
+            }
+
+            if (System.Web.HttpContext.Current.User.IsInRole("Guest"))
+            {
+                this.btnSave.Enabled = false;
+                this.btnDelete.Enabled = false;
+            }
+        }
+    }
+
+    protected void btnSave_Click(object sender, EventArgs e)
+    {
+        if (Page.IsValid)
+        {
+            long receptDetailId = Public.ToLong(this.hdnReceptDetailId.Value);
+            int firstSum = 0;
+            int secondSum = 0;
+            int thirdSum = 0;
+
+            try
+            {
+                firstSum = db.REP_Transportations.Where(trp => trp.ReceptDetailID == receptDetailId).Sum(trp => trp.FirstBalance);
+            }
+            catch { }
+
+            try
+            {
+                secondSum = (int)db.REP_Transportations.Where(trp => trp.ReceptDetailID == receptDetailId).Sum(trp => trp.SecondBalance);
+            }
+            catch { }
+
+            try
+            {
+                thirdSum = (int)db.REP_Transportations.Where(trp => trp.ReceptDetailID == receptDetailId).Sum(trp => trp.ThirdBalance);
+            }
+            catch { }
+
+            var coefficients = from recDetail in db.REP_ReceptDetails
+                               join good in db.REP_Goods on recDetail.GoodID equals good.GoodID
+                               where recDetail.ReceptDetailID == receptDetailId
+                               select new
+                               {
+                                   firstCoefficient = good.FirstConversionCoefficient,
+                                   secondCoefficient = good.SecondConversionCoefficient
+                               };
+
+            int firstBalance = Public.ToShort(this.txtFirstBalance.Text);
+            int secondBalance = Public.ToShort(this.txtSecondBalance.Text);
+            int thirdBalance = Public.ToShort(this.txtThirdBalance.Text);
+            int total = GetTotalOrderCount(firstSum, secondSum, thirdSum, (int)coefficients.ToArray()[0].firstCoefficient, (int)coefficients.ToArray()[0].secondCoefficient) +
+                          GetTotalOrderCount(Public.ToInt(this.txtFirstBalance.Text), Public.ToInt(this.txtSecondBalance.Text), Public.ToInt(this.txtThirdBalance.Text), (int)coefficients.ToArray()[0].firstCoefficient, (int)coefficients.ToArray()[0].secondCoefficient);
+
+            if (total > Public.ToInt(this.hdnTotal.Value))
+            {
+                this.lblMessage.Text = "!تعداد وارد شده بیشتر از تعداد درون حواله/رسید میباشد";
+                return;
+            }
+
+            SupplySystem.REP_Transportation transportaion = new SupplySystem.REP_Transportation
+            {
+                ReceptDetailID = receptDetailId,
+                LicensePlateNo = this.txtLicensePlateNo.Text,
+                DriverName = this.txtDriverName.Text,
+                DriverPhone = this.txtPhone.Text,
+                BillOfLading = this.txtBillOfLading.Text,
+                InsuranceNo = this.txtInsuranceNo.Text,
+                TransportDate = this.txtDate.GeorgianDate,
+                FirstBalance = (short)firstBalance,
+                SecondBalance = (short)secondBalance,
+                ThirdBalance = (short)thirdBalance,
+                Comment = this.txtComment.Text
+            };
+
+            db.REP_Transportations.InsertOnSubmit(transportaion);
+            db.SubmitChanges();
+            SetControls(null);
+            FillGrid(Public.ToInt(this.hdnReceptDetailId.Value));
+        }
+    }
+
+    protected void btnDelete_Click(object sender, EventArgs e)
+    {
+        if (this.grdTransportations.SelectedItems.Count == 1)
+        {
+            db.REP_Transportations.DeleteOnSubmit(db.REP_Transportations.SingleOrDefault<SupplySystem.REP_Transportation>(trp => trp.TransportID == Public.ToInt(this.grdTransportations.SelectedKeys[0])));
+            db.SubmitChanges();
+            FillGrid(Public.ToInt(this.hdnReceptDetailId.Value));
+        }
+    }
+
+    private void FillGrid(int receptDetailId)
+    {
+        var transportations = from transportation in db.REP_Transportations
+                              join receptdetail in db.REP_ReceptDetails on transportation.ReceptDetailID equals receptdetail.ReceptDetailID
+                              where transportation.ReceptDetailID == receptDetailId
+                              select new
+                              {
+                                  TransportID = transportation.TransportID,
+                                  LicensePlateNo = transportation.LicensePlateNo,
+                                  DriverName = transportation.DriverName,
+                                  FirstBalance = transportation.FirstBalance,
+                                  SecondBalance = transportation.SecondBalance,
+                                  ThirdBalance = transportation.ThirdBalance,
+                              };
+
+        this.grdTransportations.DataSource = transportations.ToList();
+        this.grdTransportations.DataBind();
+    }
+
+    private int GetTotalOrderCount(int firstUnitCount, int secondUnitCount, int thirdUnitCount, int firstCoefficient, int secondCoefficient)
+    {
+        int totalCount = 0;
+
+        if (firstUnitCount > 0)
+        {
+            totalCount = firstUnitCount * firstCoefficient;
+        }
+
+        if (secondUnitCount > 0)
+        {
+            if (totalCount > 0)
+            {
+                return (totalCount * secondUnitCount) * secondCoefficient + thirdUnitCount;
+            }
+            else
+            {
+                return secondUnitCount * secondCoefficient + thirdUnitCount;
+            }
+        }
+
+        return thirdUnitCount;
+    }
+
+    private void SetControls(SupplySystem.REP_Transportation transportaion)
+    {
+        if (transportaion != null)
+        {
+            this.txtLicensePlateNo.Text = transportaion.LicensePlateNo;
+            this.txtDriverName.Text = transportaion.DriverName;
+            this.txtPhone.Text = transportaion.DriverPhone;
+            this.txtBillOfLading.Text = transportaion.BillOfLading;
+            this.txtInsuranceNo.Text = transportaion.InsuranceNo;
+            this.txtDate.Text = Public.ToPersianDate(transportaion.TransportDate);
+            this.txtFirstBalance.Text = transportaion.FirstBalance.ToString();
+            this.txtSecondBalance.Text = transportaion.SecondBalance.ToString();
+            this.txtThirdBalance.Text = transportaion.ThirdBalance.ToString();
+            this.txtComment.Text = transportaion.Comment;
+        }
+        else
+        {
+            this.txtLicensePlateNo.Text = null;
+            this.txtDriverName.Text = null;
+            this.txtPhone.Text = null;
+            this.txtBillOfLading.Text = null;
+            this.txtInsuranceNo.Text = null;
+            this.txtDate.Text = null;
+            this.txtFirstBalance.Text = null;
+            this.txtSecondBalance.Text = null;
+            this.txtThirdBalance.Text = null;
+            this.txtComment.Text = null;
+        }
+    }
+}

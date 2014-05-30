@@ -1,0 +1,100 @@
+﻿using System;
+using System.Linq;
+
+public partial class Repository_Deliveries : System.Web.UI.Page
+{
+    private SupplySystem.SupplySystem db = new SupplySystem.SupplySystem(Public.ConnectionString);
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            Public.LoadCycleMonths(this.drpMonths);
+
+            if (System.Web.HttpContext.Current.User.IsInRole("Guest"))
+            {
+                this.btnSave.Enabled = false;
+            }
+        }
+    }
+
+    protected void drpMonths_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (this.drpMonths.SelectedIndex > 0)
+        {
+            var recepts = from rcp in db.REP_Recepts
+                          join ar in db.Areas on rcp.AreaCode equals ar.AreaCode
+                          //where ar.ChiefID == System.Web.HttpContext.Current.User.Identity.Name
+                          select new
+                          {
+                              rcp.ReceptID,
+                              rcp.ReceptCode,
+                              rcp.ReceptDate,
+                              rcp.Comment
+                          };
+            this.grdRecepts.DataSource = recepts.ToList();
+            this.grdRecepts.DataBind();
+        }
+    }
+
+    protected void grdRecepts_SelectCommand(object sender, ComponentArt.Web.UI.GridItemEventArgs e)
+    {
+        LoadReceptDetails(Public.ToInt(this.grdRecepts.SelectedKeys[0]));
+    }
+
+    protected void grdReceptDetails_SelectCommand(object sender, ComponentArt.Web.UI.GridItemEventArgs e)
+    {
+        LoadTransportations(Public.ToInt(this.grdReceptDetails.SelectedKeys[0]));
+    }
+
+    protected void btnSave_Click(object sender, EventArgs e)
+    {
+        if (this.grdTransportations.SelectedItems.Count == 1)
+        {
+            db.REP_Transportations.First<SupplySystem.REP_Transportation>(t => t.TransportID == Public.ToLong(this.grdTransportations.SelectedKeys[0])).DeliverDate = DateTime.Now;
+            db.SubmitChanges();
+            LoadTransportations(Public.ToInt(this.grdReceptDetails.SelectedKeys[0]));
+            this.lblMessage.Text = Public.SUCCESSMESSAGE;
+        }
+    }
+
+    private void LoadReceptDetails(int receptId)
+    {
+        var receptDetails = from rep_receptdetail in db.REP_ReceptDetails
+                            join rep_good in db.REP_Goods on rep_receptdetail.GoodID equals rep_good.GoodID
+                            where rep_receptdetail.ReceptID == receptId
+                            select new
+                            {
+                                ReceptDetailID = rep_receptdetail.ReceptDetailID,
+                                FirstBalance = rep_receptdetail.FirstBalance,
+                                SecondBalance = rep_receptdetail.SecondBalance,
+                                ThirdBalance = rep_receptdetail.ThirdBalance,
+                                BasePrice = rep_receptdetail.BasePrice,
+                                GoodID = rep_good.GoodID,
+                                GoodName = rep_good.GoodName
+                            };
+
+        this.grdReceptDetails.DataSource = receptDetails.ToList();
+        this.grdReceptDetails.DataBind();
+    }
+
+    private void LoadTransportations(long receptDetailId)
+    {
+        var transportations = from transportation in db.REP_Transportations
+                              join receptdetail in db.REP_ReceptDetails on transportation.ReceptDetailID equals receptdetail.ReceptDetailID
+                              where transportation.ReceptDetailID == receptDetailId
+                              select new
+                              {
+                                  transportation.TransportID,
+                                  transportation.LicensePlateNo,
+                                  transportation.DriverName,
+                                  transportation.FirstBalance,
+                                  transportation.SecondBalance,
+                                  transportation.ThirdBalance,
+                                  transportation.DeliverDate
+                              };
+
+        this.grdTransportations.DataSource = transportations.ToList();
+        this.grdTransportations.DataBind();
+    }
+}

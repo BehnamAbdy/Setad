@@ -1,0 +1,140 @@
+﻿<%@ Page Title="موجودی انبارها" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
+    CodeFile="RepositoryContent.aspx.cs" Inherits="Repository_RepositoryContent" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="cph" runat="Server">
+    <div class="page-title">
+        موجودی انبارها
+    </div>
+    <asp:UpdatePanel ID="pnl" runat="server">
+        <ContentTemplate>
+            <table style="margin-right: 120px;">
+                <tr>
+                    <td class="fieldName">
+                        نوع کالا :
+                    </td>
+                    <td>
+                        <asp:DropDownList ID="drpGoodTypes" runat="server" CssClass="dropdown" DataValueField="GoodTypeID"
+                            DataTextField="TypeName" AutoPostBack="true" OnSelectedIndexChanged="drp_SelectedIndexChanged">
+                        </asp:DropDownList>
+                    </td>
+                </tr>
+            </table>
+            <div class="grid-container" style="height: 280px;">
+                <ComponentArt:Grid ID="grdGoods" runat="server" CssClass="Grid" EnableViewState="true"
+                    AutoFocusSearchBox="False" SearchTextCssClass="GridHeaderText" CallbackCachingEnabled="true"
+                    SearchOnKeyPress="true" SearchBoxCssClass="GridFooterText" ShowFooter="false"
+                    HeaderCssClass="GridHeader" AllowPaging="false" PageSize="10" FooterCssClass="GridFooter"
+                    AllowMultipleSelect="false" GroupByCssClass="GroupByCell" GroupByTextCssClass="GroupByText"
+                    PagerStyle="Slider" PagerTextCssClass="GridFooterText" PagerButtonWidth="41"
+                    PagerButtonHeight="22" SliderHeight="20" SliderWidth="150" HeaderHeight="27"
+                    SliderGripWidth="9" SliderPopupOffsetX="20" SliderPopupClientTemplateId="SliderTemplate"
+                    AllowHorizontalScrolling="true" GroupingPageSize="5" PreExpandOnGroup="true"
+                    ImagesBaseUrl="../App_Themes/Default/images/ArtImage/" PagerImagesFolderUrl="../App_Themes/Default/images/ArtImage/pager/"
+                    TreeLineImagesFolderUrl="../App_Themes/Default/images/ArtImage/lines/" TreeLineImageWidth="22"
+                    TreeLineImageHeight="19" IndentCellWidth="22" LoadingPanelPosition="MiddleCenter"
+                    GroupingNotificationText="" AllowColumnResizing="True" AllowTextSelection="True"
+                    FillContainer="True" SearchText="جستجو:" ScrollBar="Auto" ScrollBarCssClass="ScrollBar"
+                    ScrollButtonHeight="17" ScrollButtonWidth="16" ScrollGripCssClass="ScrollGrip"
+                    ScrollImagesFolderUrl="../App_Themes/Default/images/ArtImage/scroller/" ScrollTopBottomImageHeight="2"
+                    ScrollTopBottomImagesEnabled="True" ScrollTopBottomImageWidth="16" ScrollBarWidth="16"
+                    ShowHeader="False" ShowSearchBox="True">
+                    <Levels>
+                        <ComponentArt:GridLevel ShowTableHeading="false" DataKeyField="GoodID" ShowSelectorCells="false"
+                            RowCssClass="Row" ColumnReorderIndicatorImageUrl="reorder.gif" DataCellCssClass="DataCell"
+                            HeadingCellCssClass="HeadingCell" HeadingCellHoverCssClass="HeadingCellHover"
+                            HoverRowCssClass="HoverRow" HeadingCellActiveCssClass="HeadingCellActive" HeadingRowCssClass="HeadingRow"
+                            HeadingTextCssClass="HeadingCellText" SelectedRowCssClass="SelectedRow" GroupHeadingCssClass="GroupHeading"
+                            SortAscendingImageUrl="asc.gif" SortDescendingImageUrl="desc.gif" SortImageWidth="10"
+                            SortImageHeight="19">
+                            <Columns>
+                                <ComponentArt:GridColumn DataField="" HeadingText="ردیف" Align="Center" Width="35"
+                                    DataCellClientTemplateId="RowIndex" />
+                                <ComponentArt:GridColumn DataField="GoodID" Visible="false" />
+                                <ComponentArt:GridColumn DataField="GoodCode" HeadingText="کد کالا" Align="Right"
+                                    Width="35" />
+                                <ComponentArt:GridColumn DataField="GoodName" HeadingText="نام کالا" Align="Right"
+                                    Width="90" />
+                                <ComponentArt:GridColumn DataField="RepositoryName" HeadingText="نام انبار" Align="Right"
+                                    Width="80" />
+                                <ComponentArt:GridColumn DataField="RemainingByFirstUnitID" HeadingText="تعداد(واحد کلان)"
+                                    Align="Right" Width="70" />
+                                <ComponentArt:GridColumn DataField="RemainingBySecondUnitID" HeadingText="تعداد(واحد میانی)"
+                                    Align="Right" Width="70" />
+                                <ComponentArt:GridColumn DataField="RemainingByThirdUnitID" HeadingText="تعداد(واحد ریز)"
+                                    Align="Right" Width="70" />
+                            </Columns>
+                        </ComponentArt:GridLevel>
+                    </Levels>
+                    <ClientTemplates>
+                        <ComponentArt:ClientTemplate ID="RowIndex">
+                            ## DataItem.Index + 1 ##
+                        </ComponentArt:ClientTemplate>
+                        <ComponentArt:ClientTemplate ID="ClientTemplate1">
+                            ## DataItem.Index + 1 ##
+                        </ComponentArt:ClientTemplate>
+                        <ComponentArt:ClientTemplate ID="LoadingFeedbackTemplate">
+                            <table cellspacing="0" cellpadding="0" border="1" style="background: #ECE9D8">
+                                <tr>
+                                    <td style="font-size: 14px; font-family: Tahoma">
+                                        در حال بارگذاری اطلاعات...&nbsp;
+                                    </td>
+                                    <td>
+                                        <img src="../App_Themes/Default/images/ArtImage/spinner.gif" width="16" height="16"
+                                            border="0" alt="" />
+                                    </td>
+                                </tr>
+                            </table>
+                        </ComponentArt:ClientTemplate>
+                    </ClientTemplates>
+                </ComponentArt:Grid>
+            </div>
+            <table style="margin-right: 120px;">
+                <tr>
+                    <td class="fieldName">
+                        انبار :
+                    </td>
+                    <td>
+                        <asp:DropDownList ID="drpRepositories" runat="server" CssClass="dropdown" DataValueField="RepositoryID"
+                            DataTextField="RepositoryName">
+                        </asp:DropDownList>
+                        <asp:CompareValidator ID="CompareValidator1" runat="server" ErrorMessage="جنسیت را انتخاب کنید."
+                            ControlToValidate="drpRepositories" ValueToCompare="0" Operator="GreaterThan"
+                            Type="Integer">*</asp:CompareValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        تعداد(واحد کلان) :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtFirstBalance" runat="server" CssClass="textbox-large" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                        <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ErrorMessage="*"
+                            ControlToValidate="txtFirstBalance"></asp:RequiredFieldValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        تعداد(واحد میانی) :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtSecondBalance" runat="server" CssClass="textbox-large" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        تعداد(واحد ریز) :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtThirdBalance" runat="server" CssClass="textbox-large" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                    </td>
+                </tr>
+            </table>
+            <div class="button-box">
+                <asp:Button ID="btnSetCounts" runat="server" CssClass="button" Text="ثبت موجودی"
+                    OnClick="btnSetCounts_Click" OnClientClick="javascript:return isItemSelected(grdGoods)" />
+                <asp:Label ID="lblMessage" runat="server" CssClass="lbl-msg" EnableViewState="false" />
+            </div>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <script src="../Scripts/javascript.js" type="text/javascript"></script>
+</asp:Content>

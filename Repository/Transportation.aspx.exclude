@@ -1,0 +1,186 @@
+﻿<%@ Page Title="اطلاعات بار" Language="C#" MasterPageFile="~/List.master" AutoEventWireup="true"
+    CodeFile="Transportation.aspx.cs" Inherits="Repository_Transportation" %>
+
+<%@ OutputCache Location="None" %>
+<asp:Content ID="Content1" ContentPlaceHolderID="cph" runat="Server">
+    <div class="page-title">
+        اطلاعات بار
+    </div>
+    <asp:ScriptManager ID="scm" runat="server" />
+    <asp:UpdatePanel ID="pnl" runat="server">
+        <ContentTemplate>
+            <table style="margin-right: 80px;">
+                <tr>
+                    <td class="fieldName">
+                        تاریخ :
+                    </td>
+                    <td>
+                        <userControl:Date ID="txtDate" runat="server" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        شماره پلاک :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtLicensePlateNo" runat="server" CssClass="textbox-large"></asp:TextBox>
+                        <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" ErrorMessage="*"
+                            ControlToValidate="txtLicensePlateNo"></asp:RequiredFieldValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        نام راننده :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtDriverName" runat="server" CssClass="textbox-large"></asp:TextBox>
+                        <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ErrorMessage="*"
+                            ControlToValidate="txtDriverName"></asp:RequiredFieldValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        تلفن راننده :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtPhone" runat="server" CssClass="textbox-large" MaxLength="14"
+                            onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        شماره بارنامه :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtBillOfLading" runat="server" CssClass="textbox-large" MaxLength="15"></asp:TextBox>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        شماره بیمه بار :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtInsuranceNo" runat="server" CssClass="textbox-large" MaxLength="15"></asp:TextBox>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        تعداد(واحد کلان) :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtFirstBalance" runat="server" CssClass="textbox-large" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                        <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ErrorMessage="*"
+                            ControlToValidate="txtFirstBalance"></asp:RequiredFieldValidator>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        تعداد(واحد میانی) :
+                    </td>
+                    <td>
+                        <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender2" runat="server"
+                            FilterType="Numbers" TargetControlID="txtSecondBalance" />
+                        <asp:TextBox ID="txtSecondBalance" runat="server" CssClass="textbox-large"></asp:TextBox>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        تعداد(واحد ریز) :
+                    </td>
+                    <td>
+                        <ajaxToolkit:FilteredTextBoxExtender ID="FilteredTextBoxExtender7" runat="server"
+                            FilterType="Numbers" TargetControlID="txtthirdBalance" />
+                        <asp:TextBox ID="txtThirdBalance" runat="server" CssClass="textbox-large"></asp:TextBox>
+                    </td>
+                </tr>
+                <tr>
+                    <td class="fieldName">
+                        توضیحات :
+                    </td>
+                    <td>
+                        <asp:TextBox ID="txtComment" runat="server" CssClass="textbox-large" MaxLength="100"
+                            TextMode="MultiLine"></asp:TextBox>
+                    </td>
+                </tr>
+            </table>
+            <div class="button-box">
+                <asp:Button UseSubmitBehavior="false" ID="btnSave" runat="server" CssClass="button"
+                    Text="اضافه" OnClick="btnSave_Click" />
+                <asp:Button ID="btnDelete" runat="server" CssClass="button" CausesValidation="false"
+                    TabIndex="-1" Text="حذف" OnClick="btnDelete_Click" OnClientClick="javascript:return confirmBox(grdTransportations, deleteConfirmationMessagse)" />
+                <input id="btnBack" type="button" class="button" value="بازگشت" onclick="closeform()" />
+                <asp:Label ID="lblMessage" runat="server" CssClass="lbl-msg" EnableViewState="false" />
+            </div>
+            <div class="grid-container" style="height: 150px;">
+                <ComponentArt:Grid ID="grdTransportations" runat="server" CssClass="Grid" EnableViewState="true"
+                    AutoFocusSearchBox="False" SearchTextCssClass="GridHeaderText" CallbackCachingEnabled="true"
+                    SearchOnKeyPress="true" SearchBoxCssClass="GridFooterText" ShowFooter="false"
+                    HeaderCssClass="GridHeader" AllowPaging="false" PageSize="5" FooterCssClass="GridFooter"
+                    AllowMultipleSelect="false" GroupByCssClass="GroupByCell" GroupByTextCssClass="GroupByText"
+                    PagerStyle="Slider" PagerTextCssClass="GridFooterText" PagerButtonWidth="41"
+                    PagerButtonHeight="22" SliderHeight="20" SliderWidth="150" HeaderHeight="27"
+                    SliderGripWidth="9" SliderPopupOffsetX="20" SliderPopupClientTemplateId="SliderTemplate"
+                    AllowHorizontalScrolling="true" GroupingPageSize="5" PreExpandOnGroup="true"
+                    ImagesBaseUrl="../App_Themes/Default/images/ArtImage/" PagerImagesFolderUrl="../App_Themes/Default/images/ArtImage/pager/"
+                    TreeLineImagesFolderUrl="../App_Themes/Default/images/ArtImage/lines/" TreeLineImageWidth="22"
+                    TreeLineImageHeight="19" IndentCellWidth="22" LoadingPanelPosition="MiddleCenter"
+                    GroupingNotificationText="" AllowColumnResizing="True" AllowTextSelection="True"
+                    FillContainer="True" SearchText="جستجو:" ScrollBar="Auto" ScrollBarCssClass="ScrollBar"
+                    ScrollButtonHeight="17" ScrollButtonWidth="16" ScrollGripCssClass="ScrollGrip"
+                    ScrollImagesFolderUrl="../App_Themes/Default/images/ArtImage/scroller/" ScrollTopBottomImageHeight="2"
+                    ScrollTopBottomImagesEnabled="True" ScrollTopBottomImageWidth="16" ScrollBarWidth="16"
+                    ShowHeader="False" ShowSearchBox="True">
+                    <ClientEvents>
+                        <ItemDoubleClick EventHandler="select" />
+                    </ClientEvents>
+                    <Levels>
+                        <ComponentArt:GridLevel DataKeyField="SchoolID" ShowTableHeading="false" ShowSelectorCells="false"
+                            RowCssClass="Row" ColumnReorderIndicatorImageUrl="reorder.gif" DataCellCssClass="DataCell"
+                            HeadingCellCssClass="HeadingCell" HeadingCellHoverCssClass="HeadingCellHover"
+                            HoverRowCssClass="HoverRow" HeadingCellActiveCssClass="HeadingCellActive" HeadingRowCssClass="HeadingRow"
+                            HeadingTextCssClass="HeadingCellText" SelectedRowCssClass="SelectedRow" GroupHeadingCssClass="GroupHeading"
+                            SortAscendingImageUrl="asc.gif" SortDescendingImageUrl="desc.gif" SortImageWidth="10"
+                            SortImageHeight="19">
+                            <Columns>
+                                <ComponentArt:GridColumn DataField="TransportID" Visible="false" />
+                                <ComponentArt:GridColumn DataField="" HeadingText="ردیف" Align="Center" Width="30"
+                                    DataCellClientTemplateId="ctlRow" />
+                                <ComponentArt:GridColumn DataField="LicensePlateNo" HeadingText="پلاک خودرو" Align="Right"
+                                    Width="100" />
+                                <ComponentArt:GridColumn DataField="DriverName" HeadingText="نام راننده" Align="Right"
+                                    Width="150" />
+                                <ComponentArt:GridColumn DataField="FirstBalance" HeadingText="تعداد(واحد کلان)"
+                                    Align="Right" Width="70" />
+                                <ComponentArt:GridColumn DataField="SecondBalance" HeadingText="تعداد(واحد میانی)"
+                                    Align="Right" Width="70" />
+                                <ComponentArt:GridColumn DataField="ThirdBalance" HeadingText="تعداد(واحد ریز)" Align="Right"
+                                    Width="70" />
+                            </Columns>
+                        </ComponentArt:GridLevel>
+                    </Levels>
+                    <ClientTemplates>
+                        <ComponentArt:ClientTemplate ID="ctlRow">
+                            ## DataItem.Index + 1 ##
+                        </ComponentArt:ClientTemplate>
+                    </ClientTemplates>
+                </ComponentArt:Grid>
+            </div>
+            <asp:HiddenField ID="hdnReceptDetailId" runat="server" />
+            <asp:HiddenField ID="hdnTotal" runat="server" />
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <script src="../Scripts/jquery-1.4.3.min.js" type="text/javascript"></script>
+    <script src="../Scripts/javascript.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        function select() {
+            getSelectedItems(grdTransportations);
+        }
+
+        $(document).ready(function () {
+            $('#lst-mst-wrapper').css({ 'height': '620px', 'width': '600px' });
+            $('#lst-mst-topbar').text('اطلاعات بار');
+        });
+
+    </script>
+</asp:Content>

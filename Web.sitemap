@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<siteMap xmlns="http://schemas.microsoft.com/AspNet/SiteMap-File-1.0" >
+  <siteMapNode url="" title="" description="" roles="*">
+
+    <siteMapNode title="صفحه نخست" url="~/Default.aspx"></siteMapNode>
+    <siteMapNode title="کاربری" url="" roles="SchoolManager,AreaManager,Administrator,Guest">
+      <siteMapNode title="پیام ها" url="~/User/Message.aspx" roles="SchoolManager,AreaManager,Administrator,Guest"/>
+      <siteMapNode title="کاربر جدید" url="~/User/NewUser.aspx" roles="Administrator,Guest"/>
+      <siteMapNode title="ویرایش پروفایل" url="~/User/Profile.aspx" roles="SchoolManager,AreaManager,Administrator,Guest"/>
+      <siteMapNode title="ویرایش گذرواژه" url="~/User/ChangePassword.aspx" roles="SchoolManager,AreaManager,Administrator,Guest"/>
+    </siteMapNode>
+
+    <siteMapNode title="ورود اطلاعات" url="" roles="SchoolManager,Administrator,AreaManager,Guest">
+      <siteMapNode title="فرم شیر روزانه" url="~/School/DailyRation.aspx"  roles="SchoolManager,AreaManager,Administrator,Guest"/>
+      <siteMapNode title="فرم مصرف ماهانه" url="~/School/MonthlyRation.aspx"  roles="SchoolManager,AreaManager,Administrator,Guest"/>
+      <siteMapNode title="فرم نوشت افزار آموزشگاه" url="~/School/Paperity.aspx"  roles="AreaManager,Administrator,Guest"/>
+      <siteMapNode title="فرم پوشاک آموزشگاه" url="~/School/Clothe.aspx"  roles="AreaManager,Administrator,Guest"/>
+    </siteMapNode >
+
+    <siteMapNode title="امکانات" url="" roles="SchoolManager,Administrator,AreaManager,Guest">
+      <siteMapNode title="تعریف آموزشگاه" url="~/School/School.aspx" roles="SchoolManager,AreaManager,Administrator,Guest"/>
+      <siteMapNode title="تفکیک آموزشگاه" url="~/School/DisIntegration.aspx" roles="Administrator,Guest"/>
+      <siteMapNode title="ویرایش مقطع آموزشگاه" url="~/School/EditLevel.aspx"  roles="Administrator,Guest"/>
+      <siteMapNode title="ویرایش جنسیت آموزشگاه" url="~/School/EditGender.aspx"  roles="AreaManager,Administrator,Guest"/>
+      <siteMapNode title="ویرایش آمار دانش آموزان" url="~/School/EditStudentsCount.aspx"  roles="AreaManager,Administrator,Guest"/>
+      <siteMapNode title="ویرایش آمار کارکنان" url="~/School/EditEmployeesCount.aspx"  roles="AreaManager,Administrator,Guest"/>
+    </siteMapNode >
+
+    <siteMapNode title="اطلاعات پایه" url=""  roles="Administrator,Guest">
+      <siteMapNode title="تقویم آموزشی" url="~/BaseInfo/CalanderWorkly.aspx"  roles="Administrator,Guest"/>
+      <siteMapNode title="دوره آموزشی" url="~/BaseInfo/Cycles.aspx" roles="Administrator,Guest"/>
+      <siteMapNode title="پوشاک دوره" url="~/BaseInfo/CycleStuffs.aspx?mode=2" roles="Administrator,Guest"/>
+      <siteMapNode title="سهمیه روزانه دوره" url="~/BaseInfo/CycleStuffs.aspx?mode=1" roles="Administrator,Guest"/>
+      <siteMapNode title="نوشت افزار دوره" url="~/BaseInfo/CycleStuffs.aspx?mode=3" roles="Administrator,Guest"/>
+      <siteMapNode title="شهرستان ها" url="~/BaseInfo/Cities.aspx" roles="Administrator,Guest"/>
+      <siteMapNode title="مناطق آموزشی" url="~/BaseInfo/Areas.aspx" roles="Administrator,Guest"/>
+      <siteMapNode title="نوع آموزشگاه" url="~/BaseInfo/SchoolKinds.aspx" roles="Administrator,Guest"/>
+      <siteMapNode title="مقاطع آموزشی" url="~/BaseInfo/Levels.aspx" roles="Administrator,Guest"/>
+      <siteMapNode title="پایه های مقطع" url="~/BaseInfo/Sublevels.aspx" roles="Administrator,Guest"/>
+    </siteMapNode >
+
+    <siteMapNode title="انبار" url=""  roles="Administrator,Repository,Guest">
+      <siteMapNode title="تعریف نوع انبار" url="~/Repository/RepositoryType.aspx" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="تعریف انبار" url="~/Repository/Repository.aspx" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="موجودی انبار" url="~/Repository/RepositoryContent.aspx" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="واحدهای کالا" url="~/Repository/Units.aspx" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="تعریف دسنه های کالا" url="~/Repository/StuffTypes.aspx" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="تعریف کالا" url="~/Repository/Stuffs.aspx" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="صدور حواله انبار" url="~/Repository/Recepts.aspx?type=1" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="صدور رسید انبار" url="~/Repository/Recepts.aspx?type=2" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="برگشت از حواله" url="~/Repository/Recepts.aspx?type=3" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="برگشت از رسید" url="~/Repository/Recepts.aspx?type=4" roles="Administrator,Repository,Guest"/>
+      <siteMapNode title="تحویل حواله" url="~/Repository/Deliveries.aspx" roles="Administrator,Repository,Guest"/>
+    </siteMapNode >
+
+    <siteMapNode title="گزارشات" url=""  roles="Administrator,AreaManager,SchoolManager,Guest">
+      <siteMapNode title="آموزشگاه ها" url="~/Report/SchoolsReport.aspx"  roles="Administrator,AreaManager,Guest"/>
+      <siteMapNode title="تغذیه پایه ها" url="~/Report/SublevelRationRep.aspx"  roles="Administrator,AreaManager,SchoolManager,Guest"/>
+      <siteMapNode title="تغذیه آموزشگاه" url="~/Report/SchoolRationRep.aspx"  roles="Administrator,AreaManager,SchoolManager,Guest"/>
+      <siteMapNode title="نوشت افزار پایه ها" url="~/Report/PaperityReport.aspx"  roles="Administrator,AreaManager,SchoolManager,Guest"/>
+      <siteMapNode title="نوشت افزار آموزشگاه" url="~/Report/SchoolPaperityRep.aspx"  roles="Administrator,AreaManager,SchoolManager,Guest"/>
+      <siteMapNode title="پوشاک پایه ها" url="~/Report/ClotheReport.aspx"  roles="Administrator,AreaManager,Guest"/>
+      <siteMapNode title="پوشاک آموزشگاه" url="~/Report/SchoolClotheRep.aspx"  roles="Administrator,AreaManager,SchoolManager,Guest"/>
+      <siteMapNode title="ویرایش آمار دانش آموزان" url="~/Report/SubLevelsArchive.aspx"  roles="Administrator,AreaManager,SchoolManager,Guest"/>
+      <siteMapNode title="ویرایش آمار پرسنل" url="~/Report/EpmloyeesArchive.aspx"  roles="Administrator,AreaManager,SchoolManager,Guest"/>
+    </siteMapNode >
+
+    <siteMapNode title="نمودارها" url=""  roles="Administrator,Guest">
+      <siteMapNode title="نمودار تغذیه" url="~/Report/Charts.aspx?mode=1"  roles="Administrator,Guest"/>
+      <siteMapNode title="نمودار نوشت افزار" url="~/Report/Charts.aspx?mode=2"  roles="Administrator,Guest"/>
+      <siteMapNode title="نمودار پوشاک" url="~/Report/Charts.aspx?mode=3"  roles="Administrator,Guest"/>
+    </siteMapNode >
+
+  </siteMapNode>
+</siteMap>

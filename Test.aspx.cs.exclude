@@ -1,0 +1,48 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+using System.Data.SqlClient;
+using System.Data;
+
+public partial class Test : System.Web.UI.Page
+{
+    public void Load()
+    {
+        SqlConnection con = new SqlConnection(@"Data Source=.\SQL2008;Initial Catalog=Panel;Integrated Security=True;");
+        SqlCommand cmd = new SqlCommand(@"SELECT * FROM Licenses", con);
+        cmd.CommandType = CommandType.Text;
+        try
+        {
+            con.Open();
+            this.grd.DataSource = cmd.ExecuteReader();
+            this.grd.DataBind();
+        }
+        catch (Exception ex)
+        {
+            Response.Write(ex.Message);
+        }
+        finally
+        {
+            con.Close();
+        }
+    }
+
+    protected void Button1_Click(object sender, EventArgs e)
+    {
+        Load();
+    }
+
+    protected void Button2_Click(object sender, EventArgs e)
+    {
+        SqlConnection con = new SqlConnection(@"Data Source=.\SQL2008;Initial Catalog=Panel;Integrated Security=True;");
+        SqlCommand cmd = new SqlCommand(this.TextBox1.Text, con);
+        cmd.CommandType = CommandType.Text;
+        con.Open();
+        cmd.ExecuteScalar();
+        con.Close();
+        Load();
+    }
+}

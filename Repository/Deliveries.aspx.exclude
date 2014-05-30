@@ -1,0 +1,208 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
+    CodeFile="Deliveries.aspx.cs" Inherits="Repository_Deliveries" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="cph" runat="Server">
+    <asp:UpdatePanel ID="pnl" runat="server">
+        <ContentTemplate>
+            <table style="margin-right: 150px;">
+                <tr>
+                    <td class="fieldName">
+                        حواله های ماه :
+                    </td>
+                    <td>
+                        <asp:DropDownList ID="drpMonths" runat="server" CssClass="dropdown" AutoPostBack="true"
+                            OnSelectedIndexChanged="drpMonths_SelectedIndexChanged" Width="200px">
+                        </asp:DropDownList>
+                    </td>
+                </tr>
+            </table>
+            <br />
+            <center>
+                <div class="page-title">
+                    لیست حواله های
+                </div>
+                <div style="height: 150px; width: 600px;">
+                    <ComponentArt:Grid ID="grdRecepts" runat="server" CssClass="Grid" AutoFocusSearchBox="False"
+                        SearchTextCssClass="GridHeaderText" CallbackCachingEnabled="True" SearchOnKeyPress="True"
+                        SearchBoxCssClass="GridFooterText" ShowFooter="False" HeaderCssClass="GridHeader"
+                        AllowPaging="False" PageSize="8" FooterCssClass="GridFooter" AllowMultipleSelect="False"
+                        GroupByCssClass="GroupByCell" GroupByTextCssClass="GroupByText" PagerStyle="Slider"
+                        PagerTextCssClass="GridFooterText" PagerButtonWidth="41" PagerButtonHeight="22"
+                        SliderWidth="150" HeaderHeight="27" SliderGripWidth="9" SliderPopupOffsetX="20"
+                        SliderPopupClientTemplateId="SliderTemplate" GroupingPageSize="5" PreExpandOnGroup="True"
+                        ImagesBaseUrl="../App_Themes/Default/images/ArtImage/" PagerImagesFolderUrl="../App_Themes/Default/images/ArtImage/pager/"
+                        TreeLineImagesFolderUrl="../App_Themes/Default/images/ArtImage/lines/" TreeLineImageWidth="22"
+                        TreeLineImageHeight="19" IndentCellWidth="22" LoadingPanelClientTemplateId="LoadingFeedbackTemplate"
+                        LoadingPanelPosition="MiddleCenter" GroupingNotificationText="" AllowTextSelection="True"
+                        FillContainer="True" SearchText="جستجو:" ScrollBar="Auto" ScrollBarCssClass="ScrollBar"
+                        ScrollButtonHeight="17" ScrollButtonWidth="16" ScrollGripCssClass="ScrollGrip"
+                        ScrollImagesFolderUrl="../App_Themes/Default/images/ArtImage/scroller/" ScrollTopBottomImageHeight="2"
+                        ScrollTopBottomImagesEnabled="True" ScrollTopBottomImageWidth="16" ScrollBarWidth="16"
+                        ShowSearchBox="True" CollapseSlide="None" RecordCount="0" AutoPostBackOnSelect="True"
+                        OnSelectCommand="grdRecepts_SelectCommand">
+                        <Levels>
+                            <ComponentArt:GridLevel ShowTableHeading="false" DataKeyField="ReceptID" ShowSelectorCells="false"
+                                RowCssClass="Row" ColumnReorderIndicatorImageUrl="reorder.gif" DataCellCssClass="DataCell"
+                                HeadingCellCssClass="HeadingCell" HeadingCellHoverCssClass="HeadingCellHover"
+                                HoverRowCssClass="HoverRow" HeadingCellActiveCssClass="HeadingCellActive" HeadingRowCssClass="HeadingRow"
+                                HeadingTextCssClass="HeadingCellText" SelectedRowCssClass="SelectedRow" GroupHeadingCssClass="GroupHeading"
+                                SortAscendingImageUrl="asc.gif" SortDescendingImageUrl="desc.gif" SortImageWidth="10"
+                                SortImageHeight="19">
+                                <Columns>
+                                    <ComponentArt:GridColumn DataField="ReceptID" Visible="false" />
+                                    <ComponentArt:GridColumn HeadingText="ردیف" Align="Center" DataCellClientTemplateId="RowIndex1"
+                                        Width="30" />
+                                    <ComponentArt:GridColumn DataField="ReceptCode" HeadingText="کد حواله" Align="Center"
+                                        Width="70" />
+                                    <ComponentArt:GridColumn DataField="ReceptDate" HeadingText="تاریخ حواله" Align="Center"
+                                        Width="90" DataCellServerTemplateId="ReceptDate" />
+                                    <ComponentArt:GridColumn DataField="Comment" HeadingText="شرح حواله" Align="Center"
+                                        Width="200" />
+                                </Columns>
+                            </ComponentArt:GridLevel>
+                        </Levels>
+                        <ClientTemplates>
+                            <ComponentArt:ClientTemplate ID="RowIndex1">
+                                ## DataItem.Index + 1 ##
+                            </ComponentArt:ClientTemplate>
+                        </ClientTemplates>
+                        <ServerTemplates>
+                            <ComponentArt:GridServerTemplate ID="ReceptDate">
+                                <Template>
+                                    <span>
+                                        <%# Public.ToPersianDate((DateTime)Container.DataItem["ReceptDate"])%></span>
+                                </Template>
+                            </ComponentArt:GridServerTemplate>
+                        </ServerTemplates>
+                    </ComponentArt:Grid>
+                </div>
+                <br />
+                <div class="page-title">
+                    لیست اقلام حواله
+                </div>
+                <div style="height: 200px; width: 600px;">
+                    <ComponentArt:Grid ID="grdReceptDetails" runat="server" CssClass="Grid" AutoFocusSearchBox="False"
+                        SearchTextCssClass="GridHeaderText" CallbackCachingEnabled="True" SearchOnKeyPress="True"
+                        SearchBoxCssClass="GridFooterText" ShowFooter="False" HeaderCssClass="GridHeader"
+                        AllowPaging="False" PageSize="8" FooterCssClass="GridFooter" AllowMultipleSelect="False"
+                        GroupByCssClass="GroupByCell" GroupByTextCssClass="GroupByText" PagerStyle="Slider"
+                        PagerTextCssClass="GridFooterText" PagerButtonWidth="41" PagerButtonHeight="22"
+                        SliderWidth="150" HeaderHeight="27" SliderGripWidth="9" SliderPopupOffsetX="20"
+                        SliderPopupClientTemplateId="SliderTemplate" GroupingPageSize="5" PreExpandOnGroup="True"
+                        ImagesBaseUrl="../App_Themes/Default/images/ArtImage/" PagerImagesFolderUrl="../App_Themes/Default/images/ArtImage/pager/"
+                        TreeLineImagesFolderUrl="../App_Themes/Default/images/ArtImage/lines/" TreeLineImageWidth="22"
+                        TreeLineImageHeight="19" IndentCellWidth="22" LoadingPanelClientTemplateId="LoadingFeedbackTemplate"
+                        LoadingPanelPosition="MiddleCenter" GroupingNotificationText="" AllowTextSelection="True"
+                        FillContainer="True" SearchText="جستجو:" ScrollBar="Auto" ScrollBarCssClass="ScrollBar"
+                        ScrollButtonHeight="17" ScrollButtonWidth="16" ScrollGripCssClass="ScrollGrip"
+                        ScrollImagesFolderUrl="../App_Themes/Default/images/ArtImage/scroller/" ScrollTopBottomImageHeight="2"
+                        ScrollTopBottomImagesEnabled="True" ScrollTopBottomImageWidth="16" ScrollBarWidth="16"
+                        ShowSearchBox="True" CollapseSlide="None" RecordCount="0" AutoPostBackOnSelect="True"
+                        OnSelectCommand="grdReceptDetails_SelectCommand">
+                        <Levels>
+                            <ComponentArt:GridLevel ShowTableHeading="false" DataKeyField="ReceptDetailID" ShowSelectorCells="false"
+                                RowCssClass="Row" ColumnReorderIndicatorImageUrl="reorder.gif" DataCellCssClass="DataCell"
+                                HeadingCellCssClass="HeadingCell" HeadingCellHoverCssClass="HeadingCellHover"
+                                HoverRowCssClass="HoverRow" HeadingCellActiveCssClass="HeadingCellActive" HeadingRowCssClass="HeadingRow"
+                                HeadingTextCssClass="HeadingCellText" SelectedRowCssClass="SelectedRow" GroupHeadingCssClass="GroupHeading"
+                                SortAscendingImageUrl="asc.gif" SortDescendingImageUrl="desc.gif" SortImageWidth="10"
+                                SortImageHeight="19">
+                                <Columns>
+                                    <ComponentArt:GridColumn DataField="ReceptDetailID" Visible="false" />
+                                    <ComponentArt:GridColumn DataField="GoodID" Visible="false" />
+                                    <ComponentArt:GridColumn DataField="Total" Visible="false" />
+                                    <ComponentArt:GridColumn HeadingText="ردیف" Align="Center" DataCellClientTemplateId="RowIndex2"
+                                        Width="20" />
+                                    <ComponentArt:GridColumn DataField="GoodName" HeadingText="نام کالا" Align="Center"
+                                        Width="90" />
+                                    <ComponentArt:GridColumn DataField="FirstBalance" HeadingText="تعداد(واحد کلان)"
+                                        Align="Center" Width="60" />
+                                    <ComponentArt:GridColumn DataField="SecondBalance" HeadingText="تعداد(واحد میانی)"
+                                        Align="Center" Width="60" />
+                                    <ComponentArt:GridColumn DataField="ThirdBalance" HeadingText="تعداد(واحد ریز)" Align="Center"
+                                        Width="60" />
+                                </Columns>
+                            </ComponentArt:GridLevel>
+                        </Levels>
+                        <ClientTemplates>
+                            <ComponentArt:ClientTemplate ID="RowIndex2">
+                                ## DataItem.Index + 1 ##
+                            </ComponentArt:ClientTemplate>
+                        </ClientTemplates>
+                    </ComponentArt:Grid>
+                </div>
+                <br />
+                <div class="page-title">
+                    اطلاعات حمل
+                </div>
+                <div style="height: 150px; margin: 5px 4px 5px 5px; width: 700px;">
+                    <ComponentArt:Grid ID="grdTransportations" runat="server" CssClass="Grid" EnableViewState="true"
+                        AutoFocusSearchBox="False" SearchTextCssClass="GridHeaderText" CallbackCachingEnabled="true"
+                        SearchOnKeyPress="true" SearchBoxCssClass="GridFooterText" ShowFooter="false"
+                        HeaderCssClass="GridHeader" AllowPaging="false" PageSize="14" FooterCssClass="GridFooter"
+                        AllowMultipleSelect="false" GroupByCssClass="GroupByCell" GroupByTextCssClass="GroupByText"
+                        PagerStyle="Slider" PagerTextCssClass="GridFooterText" PagerButtonWidth="41"
+                        PagerButtonHeight="22" SliderHeight="20" SliderWidth="150" HeaderHeight="27"
+                        SliderGripWidth="9" SliderPopupOffsetX="20" SliderPopupClientTemplateId="SliderTemplate"
+                        AllowHorizontalScrolling="false" GroupingPageSize="5" PreExpandOnGroup="true"
+                        ImagesBaseUrl="../App_Themes/Default/images/ArtImage/" PagerImagesFolderUrl="../App_Themes/Default/images/ArtImage/pager/"
+                        TreeLineImagesFolderUrl="../App_Themes/Default/images/ArtImage/lines/" TreeLineImageWidth="22"
+                        TreeLineImageHeight="19" IndentCellWidth="22" LoadingPanelPosition="MiddleCenter"
+                        GroupingNotificationText="" AllowColumnResizing="True" AllowTextSelection="True"
+                        FillContainer="True" SearchText="جستجو:" ScrollBar="Auto" ScrollBarCssClass="ScrollBar"
+                        ScrollButtonHeight="17" ScrollButtonWidth="16" ScrollGripCssClass="ScrollGrip"
+                        ScrollImagesFolderUrl="../App_Themes/Default/images/ArtImage/scroller/" ScrollTopBottomImageHeight="2"
+                        ScrollTopBottomImagesEnabled="True" ScrollTopBottomImageWidth="16" ScrollBarWidth="16"
+                        ShowHeader="False" ShowSearchBox="True">
+                        <Levels>
+                            <ComponentArt:GridLevel ShowTableHeading="false" DataKeyField="TransportID" ShowSelectorCells="false"
+                                RowCssClass="Row" ColumnReorderIndicatorImageUrl="reorder.gif" DataCellCssClass="DataCell"
+                                HeadingCellCssClass="HeadingCell" HeadingCellHoverCssClass="HeadingCellHover"
+                                HoverRowCssClass="HoverRow" HeadingCellActiveCssClass="HeadingCellActive" HeadingRowCssClass="HeadingRow"
+                                HeadingTextCssClass="HeadingCellText" SelectedRowCssClass="SelectedRow" GroupHeadingCssClass="GroupHeading"
+                                SortAscendingImageUrl="asc.gif" SortDescendingImageUrl="desc.gif" SortImageWidth="10"
+                                SortImageHeight="19">
+                                <Columns>
+                                    <ComponentArt:GridColumn DataField="TransportID" Visible="false" />
+                                    <ComponentArt:GridColumn DataField="" HeadingText="ردیف" Align="Center" Width="20"
+                                        DataCellClientTemplateId="RowIndex3" />
+                                    <ComponentArt:GridColumn DataField="LicensePlateNo" HeadingText="پلاک خودرو" Align="Center"
+                                        Width="60" />
+                                    <ComponentArt:GridColumn DataField="DriverName" HeadingText="نام راننده" Align="Center"
+                                        Width="90" />
+                                    <ComponentArt:GridColumn DataField="FirstBalance" HeadingText="تعداد(واحد کلان)"
+                                        Align="Center" Width="60" />
+                                    <ComponentArt:GridColumn DataField="SecondBalance" HeadingText="تعداد(واحد میانی)"
+                                        Align="Center" Width="60" />
+                                    <ComponentArt:GridColumn DataField="ThirdBalance" HeadingText="تعداد(واحد ریز)" Align="Center"
+                                        Width="60" />
+                                    <ComponentArt:GridColumn DataField="DeliverDate" HeadingText="تاریخ تحویل بار" Align="Center"
+                                        Width="90" DataCellServerTemplateId="DeliverDate" />
+                                </Columns>
+                            </ComponentArt:GridLevel>
+                        </Levels>
+                        <ClientTemplates>
+                            <ComponentArt:ClientTemplate ID="RowIndex3">
+                                ## DataItem.Index + 1 ##
+                            </ComponentArt:ClientTemplate>
+                        </ClientTemplates>
+                        <ServerTemplates>
+                            <ComponentArt:GridServerTemplate ID="DeliverDate">
+                                <Template>
+                                    <span>
+                                        <%#Container.DataItem["ِDeliverDate"] == null ? "تحویل نشده" : Public.ToPersianDate((DateTime)Container.DataItem["ِDeliverDate"])%></span>
+                                </Template>
+                            </ComponentArt:GridServerTemplate>
+                        </ServerTemplates>
+                    </ComponentArt:Grid>
+                </div>
+                <div class="button-box">
+                    <asp:Button ID="btnSave" runat="server" CssClass="button" Text="تحویل گرفته شد" OnClientClick="javascript:return isItemSelected(grdTransportations)"
+                        OnClick="btnSave_Click" />
+                    <asp:Label ID="lblMessage" runat="server" CssClass="lbl-msg" EnableViewState="false" />
+                </div>
+            </center>
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <script src="../Scripts/javascript.js" type="text/javascript"></script>
+</asp:Content>

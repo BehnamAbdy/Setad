@@ -1,0 +1,49 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeFile="Site.master.cs" Inherits="Site" %>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" dir="rtl">
+<head id="Head1" runat="server">
+    <title></title>
+    <meta name="description" content="ستاد تغذیه و پوشاک دانش آموزان مناطق محروم استان فارس">
+    <meta name="keywords" content="استان فارس,مناطق محروم,آموزش و پرورش,نوشت افزار,پوشاک,تغذیه,ستاد">
+    <meta charset="UTF-8">
+</head>
+<body>
+    <form id="Form1" runat="server">
+    <asp:ScriptManager ID="scm" runat="server" />
+    <div id="header-bar">
+        <div>
+            سامانه ستاد تغذیه و پوشاک دانش آموزان</div>
+        <div>
+            مناطق محروم استان فارس</div>
+    </div>
+    <div id="menu-bar">
+        <p id="menu">
+            <asp:Menu ID="Menu1" runat="server" Orientation="Horizontal" DataSourceID="SiteMapDataSource1"
+                RenderingMode="List">
+            </asp:Menu>
+        </p>
+        <div id="login-status">
+            <asp:LoginView runat="server">
+                <AnonymousTemplate>
+                    <asp:HyperLink runat="server" NavigateUrl="~/Login.aspx" ImageUrl="~/App_Themes/Default/images/login.png"
+                        ToolTip="ورود" />
+                </AnonymousTemplate>
+                <LoggedInTemplate>
+                    <asp:ImageButton ID="imgLogout" runat="server" ImageUrl="~/App_Themes/Default/images/logout.png"
+                        OnClick="imgLogout_Clicked" CausesValidation="false" ToolTip="خروج" />&nbsp;
+                    <%=string.Format("<b style='color:#1b174e'>{0}</b> <span style='color:#b11e12'>|</span> <b style='color:#1b174e'>{1}</b>", MemberName, MemberRole)%>
+                    </small>
+                </LoggedInTemplate>
+            </asp:LoginView>
+        </div>
+    </div>
+    <div id="wrapper">
+        <asp:ContentPlaceHolder ID="cph" runat="server">
+        </asp:ContentPlaceHolder>
+    </div>
+    <asp:SiteMapDataSource ID="SiteMapDataSource1" runat="server" ShowStartingNode="false"
+        SiteMapProvider="PortalSiteMapProvider" />
+    </form>
+</body>
+</html>

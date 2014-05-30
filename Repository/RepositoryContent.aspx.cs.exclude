@@ -1,0 +1,213 @@
+﻿using System;
+using System.Linq;
+using System.Web.UI.WebControls;
+using System.Data;
+using System.Data.SqlClient;
+using System.Configuration;
+
+public partial class Repository_RepositoryContent : System.Web.UI.Page
+{
+    private SupplySystem.SupplySystem db = new SupplySystem.SupplySystem(Public.ConnectionString);
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        if (!IsPostBack)
+        {
+            this.drpGoodTypes.DataSource = db.REP_GoodTypes;
+            this.drpGoodTypes.DataBind();
+            this.drpGoodTypes.Items.Insert(0, new ListItem("--- انتخاب ---", "0"));
+
+            this.drpRepositories.DataSource = db.REP_Repositories;
+            this.drpRepositories.DataBind();
+            this.drpRepositories.Items.Insert(0, new ListItem("--- انتخاب ---", "0"));
+
+            if (System.Web.HttpContext.Current.User.IsInRole("Guest"))
+            {
+                this.btnSetCounts.Enabled = false;
+            }
+        }
+    }
+
+    protected void drp_SelectedIndexChanged(object sender, EventArgs e)
+    {
+        if (this.drpGoodTypes.SelectedIndex == 0)
+        {
+            this.grdGoods.Items.Clear();
+        }
+        else
+        {
+            FillGrid(Public.ToInt(this.drpGoodTypes.SelectedValue));
+        }
+    }
+
+    protected void btnSetCounts_Click(object sender, EventArgs e)
+    {
+        if (Page.IsValid && this.grdGoods.SelectedItems.Count == 1)
+        {
+            SupplySystem.REP_Repository_Good repGood = new SupplySystem.REP_Repository_Good
+            {
+                GoodID = Public.ToInt(this.grdGoods.SelectedKeys[0]),
+                RepositoryID = Public.ToShort(this.drpRepositories.SelectedValue),
+                RemainingByFirstUnitID = Public.ToInt(this.txtFirstBalance.Text),
+                RemainingBySecondUnitID = Public.ToInt(this.txtSecondBalance.Text),
+                RemainingByThirdUnitID = Public.ToInt(this.txtThirdBalance.Text)
+            };
+
+            db.REP_Repository_Goods.InsertOnSubmit(repGood);
+            db.SubmitChanges();
+            this.lblMessage.Text = Public.SUCCESSMESSAGE;
+            SetControls(null);
+            FillGrid(Public.ToInt(this.drpGoodTypes.SelectedValue));
+        }
+    }
+
+    private void FillGrid(int goodTypeId)
+    {
+        //var goods = from good in db.REP_Goods
+        //            from rep in db.REP_Repositories
+        //            join rep_gd in db.REP_Repository_Goods
+        //                  on new { rep.RepositoryID, good.GoodID }
+        //              equals new { rep_gd.RepositoryID, rep_gd.GoodID } into rep_repgd_join
+        //            from rep_repository_goods in rep_repgd_join.DefaultIfEmpty()
+        //            where
+        //       good.GoodTypeID == PublicUtility.ToShort(this.drpGoodTypes.SelectedValue)
+        //            select new
+        //            {
+        //                GoodID = good.GoodID,
+        //                good.GoodCode,
+        //                good.GoodName,
+        //                FirstBalance = (System.Int16?)rep_repository_goods.RemainingByFirstUnitID,
+        //                SecondBalance = (System.Int16?)rep_repository_goods.RemainingBySecondUnitID,
+        //                ThirdBalance = (System.Int16?)rep_repository_goods.RemainingByThirdUnitID,
+        //                //rep.RepositoryName
+        //            };
+
+        //var goods = from good in db.REP_Goods
+        //            join rep_good in db.REP_Repository_Goods on good.GoodID equals rep_good.GoodID into gd_rg
+        //            from leftgood in gd_rg.DefaultIfEmpty()
+        //            join rep in db.REP_Repositories on leftgood.RepositoryID equals rep.RepositoryID
+        //            select new
+        //  {
+        //      GoodID = good.GoodID,
+        //      good.GoodCode,
+        //      good.GoodName,
+        //      FirstBalance = (System.Int16?)leftgood.RemainingByFirstUnitID,
+        //      SecondBalance = (System.Int16?)leftgood.RemainingBySecondUnitID,
+        //      ThirdBalance = (System.Int16?)leftgood.RemainingByThirdUnitID,
+        //      RepositoryName=rep.RepositoryName
+        //  };
+
+        //var goods = from rep in db.REP_Repositories
+        //                         join rep_good in db.REP_Repository_Goods on rep.RepositoryID equals rep_good.RepositoryID into gd_rg
+        //            from j in  gd_rg join good in db.REP_Goods  on j.GoodID equals good.GoodID into joins
+        //            from g in joins.DefaultIfEmpty()
+        //            select new
+        //            {
+        //                GoodID = g.GoodID,
+        //                g.GoodCode,
+        //                g.GoodName,
+        //                FirstBalance = (System.Int16?)j.RemainingByFirstUnitID,
+        //                SecondBalance = (System.Int16?)j.RemainingBySecondUnitID,
+        //                ThirdBalance = (System.Int16?)j.RemainingByThirdUnitID,
+        //                RepositoryName = rep.RepositoryName
+        //            };
+
+        var reps = from rep in db.REP_Repositories
+                   join rep_gd in db.REP_Repository_Goods on rep.RepositoryID equals rep_gd.RepositoryID
+                   select new
+          {
+              GoodID = rep_gd.GoodID,
+              FirstBalance = (System.Int16?)rep_gd.RemainingByFirstUnitID,
+              SecondBalance = (System.Int16?)rep_gd.RemainingBySecondUnitID,
+              ThirdBalance = (System.Int16?)rep_gd.RemainingByThirdUnitID,
+              RepositoryID = rep.RepositoryID,
+              RepositoryName = rep.RepositoryName
+          };
+
+        var goods = from good in db.REP_Goods
+                    join rep in reps on good.GoodID equals rep.GoodID into result
+                    from res in result.DefaultIfEmpty()
+                    where good.GoodTypeID == Public.ToShort(this.drpGoodTypes.SelectedValue)
+                    select new
+    {
+        GoodID = good.GoodID,
+        GoodCode = good.GoodCode,
+        GoodName = good.GoodName,
+        FirstBalance = (System.Int16?)res.FirstBalance,
+        SecondBalance = (System.Int16?)res.SecondBalance,
+        ThirdBalance = (System.Int16?)res.ThirdBalance,
+        RepositoryName = res.RepositoryName
+    };
+
+        //     from good in db.REP_Goods join rep_j in rep_repgd_join
+        //                               on good.GoodID equals 
+        //     from rep_repository_goods in rep_repgd_join.DefaultIfEmpty()
+        //     where
+        //good.GoodTypeID == PublicUtility.ToShort(this.drpGoodTypes.SelectedValue)
+        //     select new
+        //     {
+        //         GoodID = good.GoodID,
+        //         good.GoodCode,
+        //         good.GoodName,
+        //         FirstBalance = (System.Int16?)rep_repository_goods.RemainingByFirstUnitID,
+        //         SecondBalance = (System.Int16?)rep_repository_goods.RemainingBySecondUnitID,
+        //         ThirdBalance = (System.Int16?)rep_repository_goods.RemainingByThirdUnitID,
+        //         //rep.RepositoryName
+        //     };
+
+        this.grdGoods.DataSource = GetGoods();
+        this.grdGoods.DataBind();
+    }
+
+    //private void SetControls(SupplySystem.REP_Repository_Good repGood)
+    //{
+    //    if (repGood != null)
+    //    {
+    //        this.drpRepositories.SelectedValue = repGood.RepositoryID.ToString();
+    //        this.txtFirstBalance.Text = repGood.RemainingByFirstUnitID.ToString();
+    //        this.txtSecondBalance.Text = repGood.RemainingBySecondUnitID.ToString();
+    //        this.txtThirdBalance.Text = repGood.RemainingByThirdUnitID.ToString();
+    //    }
+    //    else
+    //    {
+    //        this.drpRepositories.SelectedIndex = 0;
+    //        this.txtFirstBalance.Text = null;
+    //        this.txtSecondBalance.Text = null;
+    //        this.txtThirdBalance.Text = null;
+    //    }
+    //}
+
+    private DataTable GetGoods()
+    {
+        SqlConnection conn = new SqlConnection(ConfigurationManager.ConnectionStrings["KimiaConnectionString"].ConnectionString);
+        SqlCommand command = new SqlCommand(string.Format(@"SELECT G.GoodID
+                                                                                                 , G.GoodCode
+                                                                                                 , G.GoodName
+                                                                                                 , RG.RemainingByFirstUnitID
+                                                                                                 , RG.RemainingBySecondUnitID
+                                                                                                 , RG.RemainingByThirdUnitID
+                                                                                                 , R.RepositoryName
+                                                                                            FROM  REP_Repositories R INNER JOIN
+                                                                                                        REP_Repository_Good RG ON R.RepositoryID = RG.RepositoryID 
+                                                                                                        RIGHT OUTER JOIN
+                                                                                                        REP_Goods G ON RG.GoodID = G.GoodID
+                                                                                            WHERE R.RepositoryName IS NULL AND G.GoodTypeID = {0}", Public.ToShort(this.drpGoodTypes.SelectedValue)), conn);
+        command.CommandType = CommandType.Text;
+        DataTable dt = new DataTable();
+
+        try
+        {
+            conn.Open();
+            dt.Load(command.ExecuteReader());
+            return dt;
+        }
+        catch
+        {
+            return null;
+        }
+        finally
+        {
+            conn.Close();
+        }
+    }
+}

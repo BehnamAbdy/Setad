@@ -1,0 +1,312 @@
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
+    CodeFile="Recepts.aspx.cs" Inherits="Repository_Recepts" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="cph" runat="Server">
+    <div class="page-title">
+        <p id="lblHeader" runat="server">
+        </p>
+    </div>
+    <asp:UpdatePanel ID="pnl" runat="server">
+        <ContentTemplate>
+            <asp:Panel ID="pnlHeader" runat="server" CssClass="pane-left">
+                <table style="margin-right: 90px;">
+                    <tr>
+                        <td class="fieldName">
+                            شماره رسید :
+                        </td>
+                        <td>
+                            <asp:TextBox ID="txtReceptCode" runat="server" CssClass="textbox-search" AutoPostBack="true"
+                                OnTextChanged="txtReceptCode_TextChanged" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                            <asp:Button ID="btnSearch" runat="server" CssClass="button-search" TabIndex="-1"
+                                OnClientClick="javascript:return receptsList()" />
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator3" runat="server" ErrorMessage="*"
+                                ControlToValidate="txtReceptCode"></asp:RequiredFieldValidator>
+                        </td>
+                        <td class="fieldName">
+                            تاریخ رسید :
+                        </td>
+                        <td style="padding-left: 27px;">
+                            <userControl:Date ID="txtDate" runat="server" EnableValidation="true" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fieldName">
+                            منطقه آموزشی :
+                        </td>
+                        <td colspan="3">
+                            <asp:TextBox ID="txtAreaCode" runat="server" CssClass="textbox-search" MaxLength="6"
+                                onchange="getArea(this.value)" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                            <asp:Button ID="btnAreaSearch" runat="server" CssClass="button-search" TabIndex="-1"
+                                OnClientClick="javascript:return areaList()" />
+                            <asp:TextBox ID="txtAreaName" runat="server" CssClass="label-color" Width="260px"
+                                Enabled="false"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator2" runat="server" ErrorMessage="*"
+                                ControlToValidate="txtAreaCode"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fieldName">
+                            انبار :
+                        </td>
+                        <td colspan="3">
+                            <asp:DropDownList ID="drpRepositories" runat="server" CssClass="dropdown" DataValueField="RepositoryID"
+                                DataTextField="RepositoryName">
+                            </asp:DropDownList>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fieldName">
+                            توضیحات :
+                        </td>
+                        <td colspan="3">
+                            <asp:TextBox ID="txtComment" runat="server" CssClass="textbox-large" MaxLength="200"
+                                TextMode="MultiLine" Height="30px" Width="420px"></asp:TextBox>
+                        </td>
+                    </tr>
+                </table>
+                <div class="button-box">
+                    <asp:Button UseSubmitBehavior="false" ID="btnSaveHeader" runat="server" CssClass="button"
+                        Text="ذخیره" OnClick="btnSaveHeader_Click" />
+                </div>
+            </asp:Panel>
+            <div style="height: 205px; margin: 5px; padding: 0px 80px 0px 40px;">
+                <div style="float: right; height: 200px; width: 530px;">
+                    <ComponentArt:Grid ID="grdReceptDetails" runat="server" CssClass="Grid" AutoFocusSearchBox="False"
+                        SearchTextCssClass="GridHeaderText" CallbackCachingEnabled="True" SearchOnKeyPress="True"
+                        SearchBoxCssClass="GridFooterText" ShowFooter="False" HeaderCssClass="GridHeader"
+                        AllowPaging="False" PageSize="8" FooterCssClass="GridFooter" AllowMultipleSelect="False"
+                        GroupByCssClass="GroupByCell" GroupByTextCssClass="GroupByText" PagerStyle="Slider"
+                        PagerTextCssClass="GridFooterText" PagerButtonWidth="41" PagerButtonHeight="22"
+                        SliderWidth="150" HeaderHeight="27" SliderGripWidth="9" SliderPopupOffsetX="20"
+                        SliderPopupClientTemplateId="SliderTemplate" GroupingPageSize="5" PreExpandOnGroup="True"
+                        ImagesBaseUrl="../App_Themes/Default/images/ArtImage/" PagerImagesFolderUrl="../App_Themes/Default/images/ArtImage/pager/"
+                        TreeLineImagesFolderUrl="../App_Themes/Default/images/ArtImage/lines/" TreeLineImageWidth="22"
+                        TreeLineImageHeight="19" IndentCellWidth="22" LoadingPanelClientTemplateId="LoadingFeedbackTemplate"
+                        LoadingPanelPosition="MiddleCenter" GroupingNotificationText="" AllowTextSelection="True"
+                        FillContainer="True" SearchText="جستجو:" ScrollBar="Auto" ScrollBarCssClass="ScrollBar"
+                        ScrollButtonHeight="17" ScrollButtonWidth="16" ScrollGripCssClass="ScrollGrip"
+                        ScrollImagesFolderUrl="../App_Themes/Default/images/ArtImage/scroller/" ScrollTopBottomImageHeight="2"
+                        ScrollTopBottomImagesEnabled="True" ScrollTopBottomImageWidth="16" ScrollBarWidth="16"
+                        ShowSearchBox="True" CollapseSlide="None" RecordCount="0">
+                        <Levels>
+                            <ComponentArt:GridLevel ShowTableHeading="false" DataKeyField="ReceptDetailID" ShowSelectorCells="false"
+                                RowCssClass="Row" ColumnReorderIndicatorImageUrl="reorder.gif" DataCellCssClass="DataCell"
+                                HeadingCellCssClass="HeadingCell" HeadingCellHoverCssClass="HeadingCellHover"
+                                HoverRowCssClass="HoverRow" HeadingCellActiveCssClass="HeadingCellActive" HeadingRowCssClass="HeadingRow"
+                                HeadingTextCssClass="HeadingCellText" SelectedRowCssClass="SelectedRow" GroupHeadingCssClass="GroupHeading"
+                                SortAscendingImageUrl="asc.gif" SortDescendingImageUrl="desc.gif" SortImageWidth="10"
+                                SortImageHeight="19">
+                                <Columns>
+                                    <ComponentArt:GridColumn DataField="ReceptDetailID" Visible="false" />
+                                    <ComponentArt:GridColumn DataField="GoodID" Visible="false" />
+                                    <ComponentArt:GridColumn DataField="Total" Visible="false" />
+                                    <ComponentArt:GridColumn HeadingText="ردیف" Align="Right" DataCellClientTemplateId="ctlRow"
+                                        Width="20" />
+                                    <ComponentArt:GridColumn DataField="GoodName" HeadingText="نام کالا" Align="Right"
+                                        Width="90" />
+                                    <ComponentArt:GridColumn DataField="FirstBalance" HeadingText="تعداد(واحد کلان)"
+                                        Align="Right" Width="60" />
+                                    <ComponentArt:GridColumn DataField="SecondBalance" HeadingText="تعداد(واحد میانی)"
+                                        Align="Right" Width="60" />
+                                    <ComponentArt:GridColumn DataField="ThirdBalance" HeadingText="تعداد(واحد ریز)" Align="Right"
+                                        Width="60" />
+                                    <ComponentArt:GridColumn Align="Center" Width="20" DataCellClientTemplateId="Delete" />
+                                </Columns>
+                            </ComponentArt:GridLevel>
+                        </Levels>
+                        <ClientTemplates>
+                            <ComponentArt:ClientTemplate ID="ctlRow">
+                                ## DataItem.Index + 1 ##
+                            </ComponentArt:ClientTemplate>
+                            <ComponentArt:ClientTemplate ID="Delete">
+                                <img src="../App_Themes/Default/images/delete.png" style="cursor: pointer;" onclick="javascript:deleteItem('##DataItem.GetMember('ReceptDetailID').get_value()##')"
+                                    title="حذف" alt="حذف" />
+                            </ComponentArt:ClientTemplate>
+                        </ClientTemplates>
+                    </ComponentArt:Grid>
+                </div>
+                <div style="float: left; height: 160px; border: solid 1px #d6dff7; padding: 10px 20px;
+                    margin-top: 10px;">
+                    <asp:Button ID="btnTransportation" runat="server" CssClass="button" CausesValidation="false"
+                        TabIndex="-1" Text="اطلاعات بار" OnClientClick="javascript:return transportationInfo()" />
+                </div>
+            </div>
+            <asp:Panel ID="pnlDetail" runat="server" CssClass="pane-left" Enabled="false">
+                <table style="margin-right: 90px;">
+                    <tr>
+                        <td class="fieldName">
+                            کد کالا :
+                        </td>
+                        <td colspan="3">
+                            <asp:TextBox ID="txtGoodCode" runat="server" CssClass="textbox-search" onchange="javascript:getGood()"
+                                Width="85px" ValidationGroup="d" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                            <input type="button" id="btnSearchGood" class="button-search" tabindex="-1" onclick="javascript:goodsList()" />
+                            <asp:TextBox ID="txtGoodName" runat="server" CssClass="label-color" Enabled="false"
+                                Width="275px"></asp:TextBox>
+                            <asp:RequiredFieldValidator ID="RequiredFieldValidator1" runat="server" ErrorMessage="*"
+                                ControlToValidate="txtGoodCode" ValidationGroup="d"></asp:RequiredFieldValidator>
+                        </td>
+                    </tr>                
+                    <tr>
+                        <td class="fieldName">
+                            <asp:Label ID="lblPrimaryUnit" runat="server" Text="تعداد(واحد کلان) :"></asp:Label>
+                        </td>
+                        <td>
+                            <asp:TextBox ID="txtFirstBalance" runat="server" CssClass="textbox" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                        </td>
+                        <td class="fieldName">
+                            <asp:Label ID="lblSecondaryUnit" runat="server" Text="تعداد(واحد میانی) :"></asp:Label>
+                        </td>
+                        <td>
+                            <asp:TextBox ID="txtSecondBalance" runat="server" CssClass="textbox" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="fieldName">
+                            <asp:Label ID="lblThirdUnit" runat="server" Text="تعداد(واحد ریز) :"></asp:Label>
+                        </td>
+                        <td>
+                            <asp:TextBox ID="txtThirdBalance" runat="server" CssClass="textbox" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                        </td>
+                        <td class="fieldName">
+                            قیمت پایه :
+                        </td>
+                        <td>
+                            <asp:TextBox ID="txtPrice" runat="server" CssClass="textbox" onkeypress="javascript:return isNumberKey(event)"></asp:TextBox>
+                        </td>
+                    </tr>
+                </table>
+                <div class="button-box">
+                    <asp:Button UseSubmitBehavior="false" ID="btnSaveDetail" runat="server" CssClass="button"
+                        Text="ذخیره" OnClick="btnSaveDetail_Click" ValidationGroup="d" />
+                    <br />
+                    <asp:Label ID="lblMessage" runat="server" CssClass="lbl-msg" EnableViewState="false" />
+                </div>
+            </asp:Panel>
+            <asp:HiddenField ID="hdnType" runat="server" />
+            <asp:HiddenField ID="hdnReceptId" runat="server" />
+            <asp:HiddenField ID="hdnGoodId" runat="server" />
+            <asp:HiddenField ID="hdnConversionCoefficient" runat="server" />
+        </ContentTemplate>
+    </asp:UpdatePanel>
+    <script src="../Scripts/jquery-1.4.3.min.js" type="text/javascript"></script>
+    <script src="../Scripts/javascript.js" type="text/javascript"></script>
+    <script type="text/javascript">
+
+        function receptsList() {
+            var recept = showReceptsList($get('<%=hdnType.ClientID %>', document).value);
+            if (recept != null) {
+                $get('<%=hdnReceptId.ClientID %>', document).value = recept[0].Data[0];
+                $get('<%=txtReceptCode.ClientID %>', document).value = recept[0].Data[1];
+                return true;
+            }
+        }
+
+        function goodsList() {
+            var good = showRepositoryGoodsList($get('<%=drpRepositories.ClientID %>', document).value);
+            if (good != null) {
+                $get('<%=txtGoodCode.ClientID %>', document).value = good[0].Data[0];
+                getGood();
+            }
+        }
+
+        function getGood() {
+            if ($get('<%=txtGoodCode.ClientID %>', document).value != '') {
+                $.ajax({
+                    type: 'GET',
+                    data: { gCode: $get('<%=txtGoodCode.ClientID %>', document).value, repId: $get('<%=drpRepositories.ClientID %>', document).value },
+                    url: '../Repository/Recepts.aspx',
+                    dataType: 'json',
+                    cache: false,
+                    success: function (resultdata) {
+                        var found = false;
+                        for (index in resultdata) {
+                            found = true;
+                            $get('<%=hdnGoodId.ClientID %>', document).value = resultdata[index].GoodID;
+                            $get('<%=txtGoodName.ClientID %>', document).value = resultdata[index].GoodName;
+                            $get('<%=lblPrimaryUnit.ClientID %>', document).innerHTML = resultdata[index].Unit1 + ' :';
+                            $get('<%=lblSecondaryUnit.ClientID %>', document).innerHTML = resultdata[index].Unit2 + ' :';
+                            $get('<%=lblThirdUnit.ClientID %>', document).innerHTML = resultdata[index].Unit3 + ' :';
+                            $get('<%=hdnConversionCoefficient.ClientID %>', document).value = resultdata[index].FirstConversionCoefficient + '|' + resultdata[index].SecondConversionCoefficient;
+                        }
+
+                        if (!found) {
+                            $get('<%=txtGoodCode.ClientID %>', document).value = '';
+                            $get('<%=hdnGoodId.ClientID %>', document).value = '';
+                            $get('<%=txtGoodName.ClientID %>', document).value = '';
+                            $get('<%=lblPrimaryUnit.ClientID %>', document).innerHTML = 'تعداد(واحد کلان) :';
+                            $get('<%=lblSecondaryUnit.ClientID %>', document).innerHTML = 'تعداد(واحد میانی) :';
+                            $get('<%=lblThirdUnit.ClientID %>', document).innerHTML = 'تعداد(واحد ریز) :';
+                            $get('<%=hdnConversionCoefficient.ClientID %>', document).value = '';
+                        }
+                    }
+                });
+            }
+            else {
+                $get('<%=txtGoodCode.ClientID %>', document).value = '';
+                $get('<%=hdnGoodId.ClientID %>', document).value = '';
+                $get('<%=txtGoodName.ClientID %>', document).value = '';
+                $get('<%=lblPrimaryUnit.ClientID %>', document).innerHTML = 'تعداد(واحد کلان) :';
+                $get('<%=lblSecondaryUnit.ClientID %>', document).innerHTML = 'تعداد(واحد میانی) :';
+                $get('<%=lblThirdUnit.ClientID %>', document).innerHTML = 'تعداد(واحد ریز) :';
+                $get('<%=hdnConversionCoefficient.ClientID %>', document).value = '';
+            }
+        }
+
+        function transportationInfo() {
+            if (isItemSelected(grdReceptDetails)) {
+                var receptDetailId = grdReceptDetails.getSelectedItems()[0].getMember('ReceptDetailID').get_text();
+                var total = grdReceptDetails.getSelectedItems()[0].getMember('Total').get_text();
+                showdialog('Transportation.aspx?rdId=' + receptDetailId + '&tot=' + total, null, 650, 630, false);
+            }
+            return false;
+        }
+
+        function areaList() {
+            var area = showAreasList();
+            if (area != null) {
+                $get('<%=txtAreaCode.ClientID %>', document).value = area[0].Data[0];
+                $get('<%=txtAreaName.ClientID %>', document).value = area[0].Data[1];
+            }
+            return false;
+        }
+
+        function getArea(code) {
+            $.ajax({
+                type: 'POST',
+                data: '{ code:' + code + '}',
+                url: '../Utility.asmx/GetArea',
+                dataType: 'json',
+                contentType: 'application/json; charset=utf-8',
+                success: function (response) {
+                    if (response.d != null) {
+                        $get('<%=txtAreaName.ClientID %>', document).value = response.d;
+                    }
+                    else {
+                        $get('<%=txtAreaCode.ClientID %>', document).value = '';
+                        $get('<%=txtAreaName.ClientID %>', document).value = '';
+                        $get('<%=txtAreaCode.ClientID %>', document).focus();
+                    }
+                }
+            });
+        }
+
+        function deleteItem(rdId) {
+            if (confirm('آیا این کالا از حواله/رسید حذف گردد؟')) {
+                $.ajax({
+                    type: 'GET',
+                    data: ({ rdId: rdId }),
+                    url: '../Repository/Recepts.aspx',
+                    dataType: 'json',
+                    success: function (result) {
+                        if (result == '1') {
+                            grdReceptDetails.deleteItem(grdReceptDetails.getSelectedItems()[0]);
+                            grdReceptDetails.Render();
+                        }
+                    }
+                });
+            }
+        }
+        
+    </script>
+</asp:Content>
